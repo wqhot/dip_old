@@ -26,6 +26,12 @@
     <ClInclude Include="FreCal.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="dipInclude.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageBase.cpp">
@@ -44,6 +50,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FreCal.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

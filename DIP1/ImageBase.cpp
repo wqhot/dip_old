@@ -10,11 +10,11 @@ ImageBase::~ImageBase() {
 }
 
 
-BitmapMat ImageBase::open(std::string fileName) {
+Image ImageBase::open(std::string fileName) {
     std::ifstream fin(fileName, std::ios::binary);
     unsigned char* temp;
     Bitmap bitmap;
-    BitmapMat bitmapMat;
+    Image bitmapMat;
 
     bitmap.bitmapheader.bfType = (char*)malloc(sizeof(char) * 2);
     temp = (unsigned char*)malloc(sizeof(char) * 4);
@@ -119,7 +119,7 @@ BitmapMat ImageBase::open(std::string fileName) {
 
 
 // ±£´æÍ¼Æ¬
-int ImageBase::save(std::string filename, BitmapMat bitmapMat) {
+int ImageBase::save(std::string filename, Image bitmapMat) {
     std::ofstream fout(filename, std::ios::binary);
     unsigned char* temp;
     int p = 0;//Ö¸Õë
@@ -230,7 +230,7 @@ int ImageBase::save(std::string filename, BitmapMat bitmapMat) {
 
 
 // Ïú»Ù
-int ImageBase::destory(BitmapMat imageMat) {
+int ImageBase::destory(Image imageMat) {
     if (imageMat.channel == 3) {
         imageMat.matrixB.destory();
         imageMat.matrixG.destory();
@@ -246,8 +246,8 @@ int ImageBase::destory(BitmapMat imageMat) {
 
 
 
-BitmapMat ImageBase::create(Matrix matrix) {
-	BitmapMat dest;
+Image ImageBase::create(Matrix matrix) {
+	Image dest;
 	dest.channel = 1;
 	dest.matrixB.create(matrix.width, matrix.height);
 	memcpy(dest.matrixB.data, matrix.data, matrix.width*matrix.height * sizeof(float));

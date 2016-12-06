@@ -4,19 +4,20 @@
 //Comment:bmp图像格式文件的打开
 //
 ///////////////////////////////////////////////////////////////
-#pragma once
+#ifndef IMAGBASE_H
+#define IMAGBASE_H
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <malloc.h>
 #include "Matrix.h"
-
-typedef struct Bitmap_Mat {
-    int channel;
-    Matrix matrixR;
-    Matrix matrixG;
-    Matrix matrixB;
-} BitmapMat;
+#include "Image.h"
+//typedef struct Bitmap_Mat {
+//    int channel;
+//    Matrix matrixR;
+//    Matrix matrixG;
+//    Matrix matrixB;
+//} Image;
 
 typedef struct Bitmap_File_Header {
     char* bfType;//文件类型
@@ -54,11 +55,11 @@ class ImageBase {
 public:
     ImageBase();
     ~ImageBase();
-    BitmapMat open(std::string fileName);
+    Image open(std::string fileName);
     // 保存图片
-    int save(std::string filename, BitmapMat bitmapMat);
+    int save(std::string filename, Image bitmapMat);
     // 销毁
-    int destory(BitmapMat imageMat);
-	BitmapMat create(Matrix matrix);
+    int destory(Image imageMat);
+	Image create(Matrix matrix);
 };
-
+#endif

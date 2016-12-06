@@ -11,8 +11,8 @@ ImagProc::~ImagProc() {
 
 
 // 彩色图像灰度化
-BitmapMat ImagProc::rgbToGray(BitmapMat imageMat) {
-    BitmapMat dest;
+Image ImagProc::rgbToGray(Image imageMat) {
+    Image dest;
     if (imageMat.channel == 1) {
         dest = imageMat;
     }
@@ -26,8 +26,8 @@ BitmapMat ImagProc::rgbToGray(BitmapMat imageMat) {
 
 
 // 图像镜像,mode=0表示水平镜像，=1表示垂直镜像
-BitmapMat ImagProc::mirror(BitmapMat imageMat, int mode) {
-    BitmapMat dest;
+Image ImagProc::mirror(Image imageMat, int mode) {
+    Image dest;
     if (imageMat.channel == 1) {
         dest.channel = 1;
         dest.matrixB = imageMat.matrixB.copy();
@@ -93,7 +93,7 @@ BitmapMat ImagProc::mirror(BitmapMat imageMat, int mode) {
 
 
 // 图像旋转
-BitmapMat ImagProc::rotate(BitmapMat imageMat, float degree, float fillcolor, int mode) {
+Image ImagProc::rotate(Image imageMat, float degree, float fillcolor, int mode) {
     degree = -degree;
     float angle = degree * DIP_PI / 180.;
     float alpha = cos(angle);
@@ -110,7 +110,7 @@ BitmapMat ImagProc::rotate(BitmapMat imageMat, float degree, float fillcolor, in
         mode = 1;
     }
 
-    BitmapMat dest;
+    Image dest;
     if (imageMat.channel == 3) {
         dest.channel = 3;
         if (mode == 1) {//最近邻
@@ -352,8 +352,8 @@ BitmapMat ImagProc::rotate(BitmapMat imageMat, float degree, float fillcolor, in
 
 
 // 平移
-BitmapMat ImagProc::translation(BitmapMat imageMat, int dx, int dy, float fillcolor) {
-    BitmapMat dest;
+Image ImagProc::translation(Image imageMat, int dx, int dy, float fillcolor) {
+    Image dest;
     dx = -dx;
     dy = -dy;
     if (imageMat.channel == 3) {
@@ -388,11 +388,11 @@ BitmapMat ImagProc::translation(BitmapMat imageMat, int dx, int dy, float fillco
 }
 
 
-BitmapMat ImagProc::cut(BitmapMat imageMat, int startrow, int startcol, int endrow, int endcol) {
+Image ImagProc::cut(Image imageMat, int startrow, int startcol, int endrow, int endcol) {
     if (startrow<1 || startcol<1 || endrow>imageMat.matrixB.height || endcol>imageMat.matrixB.width || startrow > endrow || startcol > endcol) {
-        return BitmapMat();
+        return Image();
     }
-    BitmapMat dest;
+    Image dest;
     if (imageMat.channel == 3) {
         dest.channel = 3;
         float *temp;
@@ -426,8 +426,8 @@ BitmapMat ImagProc::cut(BitmapMat imageMat, int startrow, int startcol, int endr
 
 
 // 缩放
-BitmapMat ImagProc::zoom(BitmapMat imageMat, float scalex,float scaley, int mode) {
-    BitmapMat dest;
+Image ImagProc::zoom(Image imageMat, float scalex,float scaley, int mode) {
+    Image dest;
     int width = (int)(scalex*imageMat.matrixB.width);
     int height = (int)(scaley*imageMat.matrixB.height);
     if (mode != 1 && mode != 2 && mode != 3) {
@@ -637,11 +637,11 @@ float ImagProc::sinpixdivpix(float x) {
 
 
 // 滤波
-BitmapMat ImagProc::filter(BitmapMat imageMat, int type, int size, int T) {
+Image ImagProc::filter(Image imageMat, int type, int size, int T) {
 	if (size % 2 != 1 || size < 3) {
 		size = 3;
 	}
-	BitmapMat dest;
+	Image dest;
 	int width = imageMat.matrixB.width;
 	int height = imageMat.matrixB.height;
 	if (imageMat.channel == 3) {

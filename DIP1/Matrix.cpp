@@ -208,7 +208,8 @@ Matrix Matrix::copy() {
 
 // 销毁
 int Matrix::destory() {
-    free(this->data);
+    if(this->data!=nullptr)
+        free(this->data);
     return 0;
 }
 
@@ -305,17 +306,18 @@ Matrix Matrix::cut(int startrow, int endrow, int startcol, int endcol) {
 
 
 
-//Matrix& Matrix::operator=(Matrix mat) {
-//	this->destory();
-//	this->create(mat.width, mat.height);
-//	this->data = mat.data;
-//	return *this;
-//	// TODO: 在此处插入 return 语句
-//}
+void Matrix::operator=(Matrix& mat) {
+    destory();
+    if (mat.data != nullptr) {
+        this->width = mat.width;
+        this->height = mat.height;
+        this->data = mat.data;
+    }
+}
 
 
 Matrix Matrix::expand(int newWidth, int newHeight) {
-	if (newWidth <= this->width || newHeight <= this->height) {
+	if (newWidth <= this->width && newHeight <= this->height) {
 		return *this;
 	}
 	float* temp = (float*)malloc(sizeof(float)*newWidth*newHeight);
@@ -334,4 +336,33 @@ Matrix Matrix::expand(int newWidth, int newHeight) {
 	Matrix dst(newHeight, newWidth, temp);
 	free(temp);
 	return dst;
+}
+
+
+Matrix Matrix::normalization(int max, int min) {
+    int width = this->width;
+    int height = this->height;
+    float temp1=FLT_MAX;//最小值
+    float temp2=FLT_MIN;//最大值
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if (temp1 > *(data + i*width + j)) {
+                temp1 = *(data + i*width + j);
+            }
+            if (temp2 < *(data + i*width + j)) {
+                temp2 = *(data + i*width + j);
+            }
+        }
+    }
+    if (temp1 == temp2) {
+        temp1 = 0;
+    }
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            *(data + i*width + j) = (*(data + i*width + j) - temp1) / (temp2 - temp1)*(max - min) + min;
+        }
+    }
+    Matrix dst(height, width, this->data);
+    return dst;
 }

@@ -4,9 +4,11 @@
 //Comment:矩阵的基本操作
 //
 ///////////////////////////////////////////////////////////////
-#pragma once
+#ifndef MATRIX_H
+#define MATRIX_H
 #include <malloc.h>
 #include <string.h>
+#include <cfloat> 
 
 class Matrix {
 public:
@@ -58,6 +60,8 @@ public:
 	Matrix mulFast(Matrix matrix);
 	Matrix cut(int startrow, int endrow, int startcol, int endcol);
 	//Matrix& operator=(Matrix mat);
+    void operator = (Matrix & mat);
 	Matrix expand(int newWidth, int newHeight);
+    Matrix normalization(int max, int min);
 };
-
+#endif

@@ -146,6 +146,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="dipInclude.h" />
     <ClInclude Include="FreCal.h" />
     <ClInclude Include="ImageBase.h" />
     <ClInclude Include="ImagProc.h" />
@@ -153,6 +155,7 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="FreCal.cpp" />
     <ClCompile Include="ImageBase.cpp" />
     <ClCompile Include="ImagProc.cpp" />
