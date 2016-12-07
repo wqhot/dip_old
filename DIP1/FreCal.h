@@ -31,7 +31,7 @@ private:
 	
 	int isBase2(int n);
 public:
-	Complex * DFT2D(Matrix& _mat/*, Complex * dst*/);
+	Complex * DFT2D(Matrix& mat/*, Complex * dst*/);
 	int IDFT2D(Complex * src, Matrix& dest, int size_w, int size_h, int old_w, int old_h);
 private:
 	int columnVector(Complex * src, Complex * dst, int size_w, int size_h);

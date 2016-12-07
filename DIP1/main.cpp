@@ -13,16 +13,16 @@ int main() {
    // img1.matrixB=img1.matrixB.cut(1, 500, 1, 500);
    // img1.matrixB = img1.matrixB.mul(img1.matrixB);
     //img1 = imageProc.zoom(img1, 0.5, 0.5, 1);
-
-	FreCal freCal;
+    img1 = imageProc.gaussLowPassFilter(img, 30,-1);
+	//FreCal freCal;
     //Matrix mat = freCal.dct2d(img1.matrixB,8);
     //img1.matrixB = freCal.idct2d(mat,8);
 
    // Image img2(mat.normalization(255,0));
-	Complex* fuliye=0;
-	int w = img1.matrixB.width;
-	int h = img1.matrixB.height;
-	fuliye=freCal.DFT2D(img1.matrixB);
+	//Complex* fuliye=0;
+	//int w = img1.matrixB.width;
+	//int h = img1.matrixB.height;
+	//fuliye=freCal.DFT2D(img1.matrixB);
 
  //   Complex* fuliye1 = (Complex*)malloc(sizeof(Complex)*img1.matrixB.width*img1.matrixB.height);
  //   memcpy(fuliye1, fuliye, sizeof(Complex)*img1.matrixB.width*img1.matrixB.height);
@@ -34,7 +34,7 @@ int main() {
     img.destory();
     //img2.destory();
 
-	free(fuliye);
+	//free(fuliye);
     //free(fuliye1);
 	//freCal.destory();
     return 0;

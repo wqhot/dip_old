@@ -5,6 +5,7 @@
 #include <math.h>
 #include "Utils.h"
 #include "Image.h"
+#include "FreCal.h"
 
 #define DIP_PI       3.14159265358979323846f
 #define DIP_E        2.718281828459f
@@ -55,6 +56,16 @@ public:
 	// 9.Sobel
 	// 10.Laplace
 	float getFilterWindow(int type, Matrix info, int size=3, int T=0);
+    // 理想低通滤波
+    Image idealLowPassFilter(Image src, float D0, int n);
+    // 巴特沃斯低通滤波
+    Image butterworthFilter(Image src, float D0, int n);
+    // 高斯低通滤波
+    Image gaussLowPassFilter(Image src, float D0, int n);
+    // 指数滤波,n>0低通,n<0高通
+    Image expFilter(Image src, float D0, int n);
+    // 梯形滤波    
+    Image trapeziumFilter(Image src, float D0, float D1, int n);
 };
 #endif
 

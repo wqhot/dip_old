@@ -228,8 +228,8 @@ int FreCal::isBase2(int n) {
 }
 
 
-Complex * FreCal::DFT2D(Matrix& _mat/*, Complex * dst*/) {
-    Matrix mat = _mat.copy();
+Complex * FreCal::DFT2D(Matrix& mat/*, Complex * dst*/) {
+    //Matrix mat = _mat.copy();
 	int size_w = mat.width;
 	int size_h = mat.height;
 

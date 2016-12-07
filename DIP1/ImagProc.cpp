@@ -817,3 +817,452 @@ float ImagProc::getFilterWindow(int type, Matrix info, int size, int T) {
 	}
 	return result;
 }
+
+
+// 理想滤波
+Image ImagProc::idealLowPassFilter(Image src, float D0,int n) {
+    FreCal freCal;
+    Image dst;
+
+    if (src.channel == 3) {
+        dst.channel = 3;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Complex* fuliye2 = 0;
+        Complex* fuliye3 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        Matrix _src2 = src.matrixG.copy();
+        Matrix _src3 = src.matrixR.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        fuliye2 = freCal.DFT2D(_src2);
+        fuliye3 = freCal.DFT2D(_src3);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                int distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1, ftemp2, ftemp3;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                ftemp2 = *(fuliye2 + i*_src1.width + j);
+                ftemp3 = *(fuliye3 + i*_src1.width + j);
+                if (n >= 0) {
+                    if (distance > D0*D0) {
+                        ftemp1.real = 0.0f;
+                        ftemp1.imagin = 0.0f;
+                        ftemp2.real = 0.0f;
+                        ftemp2.imagin = 0.0f;
+                        ftemp3.real = 0.0f;
+                        ftemp3.imagin = 0.0f;
+                    }
+                }
+                else {
+                    if (distance <= D0*D0) {
+                        ftemp1.real = 0.0f;
+                        ftemp1.imagin = 0.0f;
+                        ftemp2.real = 0.0f;
+                        ftemp2.imagin = 0.0f;
+                        ftemp3.real = 0.0f;
+                        ftemp3.imagin = 0.0f;
+                    }
+                }
+                
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+                *(fuliye2 + i*_src1.width + j) = ftemp2;
+                *(fuliye3 + i*_src1.width + j) = ftemp3;
+            }
+        }
+        freCal.IDFT2D(fuliye1, _src1, _src1.width, _src1.height, w, h);
+        freCal.IDFT2D(fuliye2, _src2, _src2.width, _src2.height, w, h);
+        freCal.IDFT2D(fuliye3, _src3, _src3.width, _src3.height, w, h);
+        dst.matrixB = _src1;
+        dst.matrixG = _src2;
+        dst.matrixR = _src3;
+        free(fuliye1);
+        free(fuliye2);
+        free(fuliye3);
+    }
+    else {
+        dst.channel = 1;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                int distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                if (n >= 0) {
+                    if (distance > D0*D0) {
+                        ftemp1.real = 0.0f;
+                        ftemp1.imagin = 0.0f;             
+                    }
+                }
+                else {
+                    if (distance <= D0*D0) {
+                        ftemp1.real = 0.0f;
+                        ftemp1.imagin = 0.0f;
+                    }
+                }
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+            }
+        }
+        freCal.IDFT2D(fuliye1, dst.matrixB, _src1.width, _src1.height, w, h);
+        _src1.destory();
+        free(fuliye1);
+    }
+    return dst;
+}
+
+
+// 巴特沃斯低通滤波
+Image ImagProc::butterworthFilter(Image src, float D0, int n) {
+    FreCal freCal;
+    Image dst;
+
+    if (src.channel == 3) {
+        dst.channel = 3;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Complex* fuliye2 = 0;
+        Complex* fuliye3 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        Matrix _src2 = src.matrixG.copy();
+        Matrix _src3 = src.matrixR.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        fuliye2 = freCal.DFT2D(_src2);
+        fuliye3 = freCal.DFT2D(_src3);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1, ftemp2, ftemp3;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                ftemp2 = *(fuliye2 + i*_src1.width + j);
+                ftemp3 = *(fuliye3 + i*_src1.width + j);
+                temp1 = 1 / (1 + powf(distance / D0 / D0, n));
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                ftemp2.real = ftemp2.real  *temp1;
+                ftemp2.imagin = ftemp2.imagin *temp1;
+                ftemp3.real = ftemp3.real  *temp1;
+                ftemp3.imagin = ftemp3.imagin  *temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+                *(fuliye2 + i*_src1.width + j) = ftemp2;
+                *(fuliye3 + i*_src1.width + j) = ftemp3;
+            }
+        }
+        freCal.IDFT2D(fuliye1, _src1, _src1.width, _src1.height, w, h);
+        freCal.IDFT2D(fuliye2, _src2, _src2.width, _src2.height, w, h);
+        freCal.IDFT2D(fuliye3, _src3, _src3.width, _src3.height, w, h);
+        dst.matrixB = _src1;
+        dst.matrixG = _src2;
+        dst.matrixR = _src3;
+        free(fuliye1);
+        free(fuliye2);
+        free(fuliye3);
+    }
+    else {
+        dst.channel = 1;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                temp1 = 1 / (1 + powf(distance / D0 / D0, n));
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+            }
+        }
+        freCal.IDFT2D(fuliye1, dst.matrixB, _src1.width, _src1.height, w, h);
+        _src1.destory();
+        free(fuliye1);
+    }
+    return dst;
+}
+
+
+// 高斯低通滤波
+Image ImagProc::gaussLowPassFilter(Image src, float D0, int n) {
+    FreCal freCal;
+    Image dst;
+
+    if (src.channel == 3) {
+        dst.channel = 3;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Complex* fuliye2 = 0;
+        Complex* fuliye3 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        Matrix _src2 = src.matrixG.copy();
+        Matrix _src3 = src.matrixR.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        fuliye2 = freCal.DFT2D(_src2);
+        fuliye3 = freCal.DFT2D(_src3);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1, ftemp2, ftemp3;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                ftemp2 = *(fuliye2 + i*_src1.width + j);
+                ftemp3 = *(fuliye3 + i*_src1.width + j);
+                if (n >= 0) {
+                    temp1 = expf(-distance / 2 / D0 / D0);
+                }
+                else {
+                    temp1 = 1.0f - expf(-distance / 2 / D0 / D0);
+                }
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                ftemp2.real = ftemp2.real  *temp1;
+                ftemp2.imagin = ftemp2.imagin *temp1;
+                ftemp3.real = ftemp3.real  *temp1;
+                ftemp3.imagin = ftemp3.imagin  *temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+                *(fuliye2 + i*_src1.width + j) = ftemp2;
+                *(fuliye3 + i*_src1.width + j) = ftemp3;
+            }
+        }
+        freCal.IDFT2D(fuliye1, _src1, _src1.width, _src1.height, w, h);
+        freCal.IDFT2D(fuliye2, _src2, _src2.width, _src2.height, w, h);
+        freCal.IDFT2D(fuliye3, _src3, _src3.width, _src3.height, w, h);
+        dst.matrixB = _src1;
+        dst.matrixG = _src2;
+        dst.matrixR = _src3;
+        free(fuliye1);
+        free(fuliye2);
+        free(fuliye3);
+    }
+    else {
+        dst.channel = 1;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                if (n >= 0) {
+                    temp1 = expf(-distance / 2 / D0 / D0);
+                }
+                else {
+                    temp1 = 1.0f - expf(-distance / 2 / D0 / D0);
+                }
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+            }
+        }
+        freCal.IDFT2D(fuliye1, dst.matrixB, _src1.width, _src1.height, w, h);
+        _src1.destory();
+        free(fuliye1);
+    }
+    return dst;
+}
+
+
+// 指数滤波,n>0低通,n<0高通
+Image ImagProc::expFilter(Image src, float D0, int n) {
+    FreCal freCal;
+    Image dst;
+
+    if (src.channel == 3) {
+        dst.channel = 3;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Complex* fuliye2 = 0;
+        Complex* fuliye3 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        Matrix _src2 = src.matrixG.copy();
+        Matrix _src3 = src.matrixR.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        fuliye2 = freCal.DFT2D(_src2);
+        fuliye3 = freCal.DFT2D(_src3);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1, ftemp2, ftemp3;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                ftemp2 = *(fuliye2 + i*_src1.width + j);
+                ftemp3 = *(fuliye3 + i*_src1.width + j);
+                temp1 = expf(-powf(sqrtf(distance) / D0, n));
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                ftemp2.real = ftemp2.real  *temp1;
+                ftemp2.imagin = ftemp2.imagin *temp1;
+                ftemp3.real = ftemp3.real  *temp1;
+                ftemp3.imagin = ftemp3.imagin  *temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+                *(fuliye2 + i*_src1.width + j) = ftemp2;
+                *(fuliye3 + i*_src1.width + j) = ftemp3;
+            }
+        }
+        freCal.IDFT2D(fuliye1, _src1, _src1.width, _src1.height, w, h);
+        freCal.IDFT2D(fuliye2, _src2, _src2.width, _src2.height, w, h);
+        freCal.IDFT2D(fuliye3, _src3, _src3.width, _src3.height, w, h);
+        dst.matrixB = _src1;
+        dst.matrixG = _src2;
+        dst.matrixR = _src3;
+        free(fuliye1);
+        free(fuliye2);
+        free(fuliye3);
+    }
+    else {
+        dst.channel = 1;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                temp1 = expf(-powf(sqrtf(distance) / D0, n));
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+            }
+        }
+        freCal.IDFT2D(fuliye1, dst.matrixB, _src1.width, _src1.height, w, h);
+        _src1.destory();
+        free(fuliye1);
+    }
+    return dst;
+}
+
+// 梯形滤波
+Image ImagProc::trapeziumFilter(Image src, float D0, float D1, int n) {
+    FreCal freCal;
+    Image dst;
+
+    if (src.channel == 3) {
+        dst.channel = 3;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Complex* fuliye2 = 0;
+        Complex* fuliye3 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        Matrix _src2 = src.matrixG.copy();
+        Matrix _src3 = src.matrixR.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        fuliye2 = freCal.DFT2D(_src2);
+        fuliye3 = freCal.DFT2D(_src3);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1, ftemp2, ftemp3;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                ftemp2 = *(fuliye2 + i*_src1.width + j);
+                ftemp3 = *(fuliye3 + i*_src1.width + j);
+                distance = sqrtf(distance);
+                if (n >= 0) {
+                    if (distance < D0) {
+                        temp1 = 1.0f;
+                    }
+                    else if (distance <= D1) {
+                        temp1 = (D1 - distance) / (D1 - D0);
+                    }
+                    else {
+                        temp1 = 0.0f;
+                    }
+                }
+                else {
+                    if (distance < D1) {
+                        temp1 = 0.0f;
+                    }
+                    else if (distance <= D0) {
+                        temp1 = (distance - D1) / (D0 - D1);
+                    }
+                    else {
+                        temp1 = 1.0f;
+                    }
+                }
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                ftemp2.real = ftemp2.real  *temp1;
+                ftemp2.imagin = ftemp2.imagin *temp1;
+                ftemp3.real = ftemp3.real  *temp1;
+                ftemp3.imagin = ftemp3.imagin  *temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+                *(fuliye2 + i*_src1.width + j) = ftemp2;
+                *(fuliye3 + i*_src1.width + j) = ftemp3;
+            }
+        }
+        freCal.IDFT2D(fuliye1, _src1, _src1.width, _src1.height, w, h);
+        freCal.IDFT2D(fuliye2, _src2, _src2.width, _src2.height, w, h);
+        freCal.IDFT2D(fuliye3, _src3, _src3.width, _src3.height, w, h);
+        dst.matrixB = _src1;
+        dst.matrixG = _src2;
+        dst.matrixR = _src3;
+        free(fuliye1);
+        free(fuliye2);
+        free(fuliye3);
+    }
+    else {
+        dst.channel = 1;
+        int w = src.matrixB.width;
+        int h = src.matrixB.height;
+        Complex* fuliye1 = 0;
+        Matrix _src1 = src.matrixB.copy();
+        fuliye1 = freCal.DFT2D(_src1);
+        for (int i = 0; i < _src1.height; i++) {
+            for (int j = 0; j < _src1.width; j++) {
+                float distance = (i - _src1.height / 2 - 1)*(i - _src1.height / 2 - 1) + (j - _src1.width / 2 - 1)*(j - _src1.width / 2 - 1);
+                Complex ftemp1;
+                float temp1;
+                ftemp1 = *(fuliye1 + i*_src1.width + j);
+                distance = sqrtf(distance);
+                if (n >= 0) {
+                    if (distance < D0) {
+                        temp1 = 1.0f;
+                    }
+                    else if (distance <= D1) {
+                        temp1 = (D1 - distance) / (D1 - D0);
+                    }
+                    else {
+                        temp1 = 0.0f;
+                    }
+                }
+                else {
+                    if (distance < D1) {
+                        temp1 = 0.0f;
+                    }
+                    else if (distance <= D0) {
+                        temp1 = (distance - D1) / (D0 - D1);
+                    }
+                    else {
+                        temp1 = 1.0f;
+                    }
+                }
+                ftemp1.real = ftemp1.real *temp1;
+                ftemp1.imagin = ftemp1.imagin*temp1;
+                *(fuliye1 + i*_src1.width + j) = ftemp1;
+            }
+        }
+        freCal.IDFT2D(fuliye1, dst.matrixB, _src1.width, _src1.height, w, h);
+        _src1.destory();
+        free(fuliye1);
+    }
+    return dst;
+}
